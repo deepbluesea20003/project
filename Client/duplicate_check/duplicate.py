@@ -30,6 +30,7 @@ def check_dup(file1, file2):
 # Example
 if check_dup('MED_DATA_20220803153918.csv', 'MED_DATA_20220803153920.csv'):
     print("DUPLICATE BATCH IDs FOUND")
-    f = open('log.txt','a')
-    f.write(datetime.datetime.now(),'ERROR DUPLICATE:MED_DATA_20220803153918.CSV AND MED_DATA_20220803153920.CSV HAVE DUPLICATE BATCH IDs\n')
+    f = open('log.txt','a+')
+    error_msg = str(datetime.datetime.now()) + ': ERROR DUPLICATE:MED_DATA_20220803153918.CSV AND MED_DATA_20220803153920.CSV HAVE DUPLICATE BATCH IDs\n'
+    f.write(error_msg)
     f.close()
