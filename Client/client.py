@@ -30,7 +30,7 @@ class BufferingProtocol(Protocol):
         self.buffer = StringIO()
 
     def dataReceived(self, data):
-        self.buffer.write(data)
+        self.buffer.write(data.decode("utf-8"))
 
 
 # Define some callbacks
