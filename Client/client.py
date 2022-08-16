@@ -55,7 +55,9 @@ def showFiles(result, fileListProtocol):
     for file in fileListProtocol.files:
         print('    %s: %d bytes, %s' \
               % (file['filename'], file['size'], file['date']))
+        print(dir(file),"\n")
     print('Total: %d files' % (len(fileListProtocol.files)))
+
 
 
 def showBuffer(result, bufferProtocol):
