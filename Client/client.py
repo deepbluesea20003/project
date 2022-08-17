@@ -1,7 +1,8 @@
 # Import Module
 import ftplib
 import os
-from duplicate_check import duplicate
+import argparse
+from datetime import datetime
 
 def validateFile(file):
     # returns True if valid, False if not
@@ -9,6 +10,7 @@ def validateFile(file):
     return True
 
 
+# downloads all new files
 def downloadFiles():
     # Our info for our FTP server
     HOSTNAME = "ftpupload.net"
@@ -26,6 +28,8 @@ def downloadFiles():
 
     # Get list of files
     myFiles = ftp_server.nlst()
+
+    print(os.getcwd())
 
     # store files in the correct folder
     os.chdir("files")
@@ -52,27 +56,56 @@ def downloadFiles():
     ftp_server.quit()
 
 
+# schedules a rota for file downloading
+def rota(days):
+    pass
+
+
+# schedules a date files are to be downloaded on
+def schedule(date):
+    pass
+
+
 # this needs to be converted t argparse, is only a temporary measure
 def run():
-    try:
-        option = int(
-            input("Choose your options:\n1 : Download files\n2 : Schedule a download\n3 : Exit program\nInput : "))
-        if not isinstance(option, int):
-            print("Please enter a valid option")
-        elif option == 1:
-            print("DOWNLOAD")
-            downloadFiles()
-            print("Files up to date\n")
-        elif option == 2:
-            print("Scheduling")
-        elif option == 3:
-            # Stops the recursion
-            return 0
-        # call again if got this far
-        run()
-    except:
-        print("Please enter a valid option")
-        run()
+    """
+    -h : help page
+    -u, --update : updates the client with all new files immediately
+    -r, --rota [DAYS] : updates the client with all new files and schedules every amount of days using cron
+    -s, --schedule [DATE]: schedules data to be sent on the date specified using cron
+    """
+
+    parser = argparse.ArgumentParser(description='Downloading and Scheduling hospital files')
+
+    group = parser.add_mutually_exclusive_group()  # only one argument allowed
+
+    group.add_argument('-u', '--update', help='Update client to have all files', required=False, action='store_true')
+
+    group.add_argument('-r', '--rota', help='Updates client every specified amount of hours', required=False,
+                       type=float)
+
+    group.add_argument('-s', '--schedule', help='Specify date which client files should be updated\n'
+                                                'The date and time should be given in the format: YYYYMMDDHHMMSS',
+                       required=False, type=str)
+
+    args = vars(parser.parse_args())
+
+    # if they haven't put anything
+    if not args['update'] and args['rota'] is None and args['schedule'] is None:
+        print("Please enter an option, or enter -h for help")
+        return False
+    elif args['update']:
+        downloadFiles()
+    elif args['rota'] is not None:
+        if args['rota'] <= 0.083:
+            print("You may only download files at a maximum rate of once every 5 minutes")
+        else:
+            rota(args['rota'])
+    else:
+        # validate that date is in the correct format
+        # taken in as string in case of
+        schedule(args['schedule'])
+    print(args)
 
 
 if __name__ == "__main__":
