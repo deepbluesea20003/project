@@ -10,12 +10,14 @@ def check_missing(filename):
     rows = []
     for row in filecsv:
         rows.append(row)
+    f.close()
     # check for any empty values
     for x in rows:
         for y in x:
             if y == '':
                 return True
     return False
+    
 
 def check_bad(filename):
     # get rows
@@ -24,6 +26,7 @@ def check_bad(filename):
     rows = []
     for row in filecsv:
         rows.append(row)
+    f.close()
     # remove header row
     rows.pop(0)
     # remove batch ID and timestamp from each row
