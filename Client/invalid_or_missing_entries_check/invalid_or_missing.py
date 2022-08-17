@@ -37,10 +37,12 @@ def check_bad(filename):
                 float(y)
             except:
                 return True
+            # if they can be, check they are in the valid range
+            if float(y) >= 10.0 or float(y) < 0.0:
+                return True
     return False
-                
-                
-    
+
+
 # Example
 if check_missing('MED_DATA_20220803153918.csv'):
     print("MISSING ENTRY FOUND in MED_DATA_20220803153918.csv")
