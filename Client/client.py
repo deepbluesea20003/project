@@ -2,7 +2,8 @@
 import ftplib
 import os
 import argparse
-from datetime import datetime
+import datetime
+
 
 def validateFile(file):
     # returns True if valid, False if not
@@ -12,6 +13,10 @@ def validateFile(file):
 
 # downloads all new files
 def downloadFiles():
+    """
+    Downloads all new files
+    :return: None
+    """
     # Our info for our FTP server
     HOSTNAME = "ftpupload.net"
     USERNAME = "epiz_32401466"
@@ -39,7 +44,7 @@ def downloadFiles():
         # Enter File Name with Extension
         # filename = "index2.html"
 
-        # TEMP
+        # TEMP, this is where validation should be
         if filename[0] == "M":
             print("STORING")
             # Write file in binary mode
@@ -57,12 +62,21 @@ def downloadFiles():
 
 
 # schedules a rota for file downloading
-def rota(days):
+def rota(hours):
+    """
+    :param hours: float value which specifies the rota length
+    :return:
+    """
     pass
 
 
 # schedules a date files are to be downloaded on
 def schedule(date):
+    """
+
+    :param date: a datetime of when the updates should schedule to
+    :return:
+    """
     pass
 
 
@@ -102,9 +116,22 @@ def run():
         else:
             rota(args['rota'])
     else:
-        # validate that date is in the correct format
-        # taken in as string in case of
+        # validate input is in correct format
+        inp = args['schedule']
+        if len(inp) != 14:
+            print("The date and time should be given in the format: YYYYMMDDHHMMSS")
+        else:
+            # check if valid datetime
+            try:
+                d = datetime.datetime(year=int(inp[0:4]), month=int(inp[4:6]), day=int(inp[6:8]), hour=int(inp[8:10]),
+                                      minute=int(inp[10:12]), second=int(inp[12:14]))
+                schedule(d)
+            except:
+                print("The date and time should be given in the format: YYYYMMDDHHMMSS")
+                print("Must enter a valid date and time")
+
         schedule(args['schedule'])
+
     print(args)
 
 
