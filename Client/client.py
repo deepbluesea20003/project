@@ -5,7 +5,6 @@ import argparse
 import datetime
 import csv
 
-
 # global value for validation error id
 error_id = 0
 
@@ -58,12 +57,14 @@ def check_bad(filename):
                 return True
     return False
 
+
 def check_header(filename):
     global error_id
     f = open(filename)
     filecsv = csv.reader(f)
     header = next(filecsv)
-    valid_header = ['batch_id', 'timestamp', 'reading1', 'reading2', 'reading3', 'reading4', 'reading5', 'reading6', 'reading7', 'reading8', 'reading9', 'reading10']
+    valid_header = ['batch_id', 'timestamp', 'reading1', 'reading2', 'reading3', 'reading4', 'reading5', 'reading6',
+                    'reading7', 'reading8', 'reading9', 'reading10']
     if header != valid_header:
         error_id = 1
         return True
@@ -81,9 +82,9 @@ def checkUniqueBatchIDs(fileName):
     ids = [i[0] for i in lines]
 
     # returns false if all ids are unique, true if not
-    if (not(len(ids) == len(set(ids)))):
+    if (not (len(ids) == len(set(ids)))):
         error_id = 3
-    return not(len(ids) == len(set(ids)))
+    return not (len(ids) == len(set(ids)))
 
 
 import tkinter as tk
@@ -141,7 +142,6 @@ def downloadFiles():
     for filename in myFiles:
         print("File is: ", filename, "\n")
 
-
         if filename[0] == "M":
             print("DOWNLOADING\n")
             # Write file in binary mode
@@ -175,7 +175,6 @@ def downloadFiles():
                 f.write(string)
             f.close()
 
-
     # Display the content of downloaded file
     # file = open(filename, "r")
     # print('File Content:', file.read())
@@ -185,21 +184,31 @@ def downloadFiles():
 
 
 # schedules a date files are to be downloaded on
-def schedule(date, length):
+def schedule(d, length):
     """
 
-    :param date: a datetime of when the updates should start
-    :param length: how often updates should happen, hourly daily, monthly or on log-on. (H,D,M,O)
+    :param d: a datetime of when the updates should start
+    :param length: how often updates should happen, hourly daily, weekly or monthly. (H,D,W,M)
     :return:
     """
 
     if os.name == 'nt':
-        command = 'SCHTASKS /CREATE /SC'
-        # just need to put it into hours and have the time starting now
-        os.system('SCHTASKS /CREATE /SC HOURLY /TN "MyTasks\\Notepad task" /TR '
-                  '"C:\\Windows\\System32\\notepad.exe" /ST 14:18')
+        letterToWord = {'H': 'HOURLY', 'D': 'DAILY', 'W': 'WEEKLY', 'M': 'MONTHLY'}
+        weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-    pass
+        pathname = '"C:\\Windows\\System32\\notepad.exe"'
+        command = 'SCHTASKS /CREATE /SC '
+        command += letterToWord[length]
+        if length == 'W':
+            command += ' /D ' + weekdays[d.weekday()]
+        if length == 'M':
+            command += ' /D ' + f"{d.day:02}"
+        command += ' /TN "MyTasks\\Notepad task" /TR '
+        command += pathname
+        command += ' /ST ' + f"{d.hour:02}" + ':' + f"{d.minute:02}"  # + time 14:18
+        command += ' /SD ' + f"{d.day:02}" + '/' + f"{d.month:02}" + '/' + f"{d.year:04}"  # + 06/06/1985
+        print(command)
+        os.system(command)
 
 
 # this needs to be converted t argparse, is only a temporary measure
@@ -214,7 +223,8 @@ def run():
 
     group = parser.add_mutually_exclusive_group()  # only one argument allowed
 
-    group.add_argument('-f', '--find', help='Use a GUI to find a file for a specific date', required=False, action='store_true')
+    group.add_argument('-f', '--find', help='Use a GUI to find a file for a specific date', required=False,
+                       action='store_true')
 
     group.add_argument('-s', '--schedule', help='Specify date which client files should be updated\n'
                                                 'The date and time should be given in the format: YYYYMMDDHHMMSS\n'
@@ -259,6 +269,7 @@ def run():
                           "Hourly, Daily, Weekly or Monthly? (H/D/W/M): ").upper().strip()
 
         timeInp = input("What time during the day? (HH:MM)")
+        print(timeInp)
 
         try:
             time = datetime.time(hour=int(timeInp[0:2]), minute=int(timeInp[3:5]))
@@ -266,7 +277,8 @@ def run():
             d = datetime.datetime.combine(date, time)
 
             schedule(d, often)
-        except:
+        except Exception as e:
+            print(e)
             print("Invalid time entered,please try again")
             return False
     print(args)
