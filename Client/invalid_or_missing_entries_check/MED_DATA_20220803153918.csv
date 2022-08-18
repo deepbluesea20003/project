@@ -1,4 +1,4 @@
-batch,timestamp,reading1,reading2,reading3,reading4,reading5,reading6,reading7,reading8,reading9,reading10
+batch_id,timestamp,reading1,reading2,reading3,reading4,reading5,reading6,reading7,reading8,reading9,reading10
 17,15:39:18,1.574,3.806,5.096,4.44,5.003,0.096,1.654,6.869,2.699,8.796
 119,15:39:18,1.459,7.528,6.228,5.51,9.718,6.057,3.347,1.35,7.953,2.295
 196,15:39:18,0.273,4.92,1.952,1.701,2.328,0.839,0.487,7.014,6.759,4.59
