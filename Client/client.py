@@ -6,6 +6,8 @@ import datetime
 import csv
 
 # global value for validation error id
+import sys
+
 error_id = 0
 
 
@@ -132,8 +134,12 @@ def downloadFiles():
 
     print(os.getcwd())
 
-    # store files in the correct folder
-    os.chdir("files")
+    # store in a folder, if one doesn't exist then create a folder
+    try:
+        os.chdir("files")
+    except Exception:
+        os.mkdir("files")
+        os.chdir("files")
 
     # Remove '.' and '..' from myFiles
     myFiles.pop(0)
@@ -159,7 +165,7 @@ def downloadFiles():
             print("DELETING FILE\n")
             os.remove(filename)
             # logging
-            error_id == int(error_id)
+            error_id = int(error_id)
             f = open("log.txt", "a")
             if error_id == 1:
                 string = str(datetime.datetime.now()) + ' ERROR: BAD HEADER FOUND IN ' + filename + '\n'
@@ -193,11 +199,21 @@ def schedule(d, length):
     """
 
     if os.name == 'nt':
+        # creating a .bat file for this
+        myBat = open(os.getcwd() + r'\load.bat', 'w')
+        myBat.write('"' + os.path.dirname(
+            sys.executable) + r'\python.exe"  "' + os.getcwd() + r'\client.py" "-a ' + os.getcwd())
+
+        myBat.write('"' + '\npause')
+        myBat.close()
+
         letterToWord = {'H': 'HOURLY', 'D': 'DAILY', 'W': 'WEEKLY', 'M': 'MONTHLY'}
         weekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-        pathname = '"C:\\Windows\\System32\\notepad.exe"'
-        command = 'SCHTASKS /CREATE /SC '
+        # print("python " + os.getcwd() + "\\client.py -u")
+
+        pathname = r'"' + os.getcwd() + r'\load.bat"'
+        command = r'SCHTASKS /CREATE /SC '
         command += letterToWord[length]
         if length == 'W':
             command += ' /D ' + weekdays[d.weekday()]
@@ -207,7 +223,7 @@ def schedule(d, length):
         command += pathname
         command += ' /ST ' + f"{d.hour:02}" + ':' + f"{d.minute:02}"  # + time 14:18
         command += ' /SD ' + f"{d.day:02}" + '/' + f"{d.month:02}" + '/' + f"{d.year:04}"  # + 06/06/1985
-        print(command)
+        # print(command)
         os.system(command)
 
 
@@ -217,6 +233,7 @@ def run():
     -h : help page
     -f, --find : use a GUI to find a file for a specific date
     -s, --schedule [DATE]: schedules data to be sent on the date specified
+    -a, --automated [PATH]: only to be used by automated scheduler
     """
 
     parser = argparse.ArgumentParser(description='Downloading and Scheduling hospital files')
@@ -232,12 +249,34 @@ def run():
                                                 'privileges',
                        required=False, nargs='?')
 
+    group.add_argument('-a', '--automated', help='Used by automated scheduler',
+                       required=False, nargs='?')
+
     args = vars(parser.parse_args())
 
+    # we need to store the location of client.py if not done so already
+    # make sure files are stored in the correct place
+    # try:
+    #     file = open("location.txt", "r")
+    #     path = file.read()
+    #     os.chdir(path)
+    #     file.close()
+    # except FileNotFoundError:
+    #     path = input("Where is your program stored?")
+    #     os.chdir(path)
+    #     file = open("location.txt", "w")
+    #     file.write(path)
+    #     file.close()
+
     # options time
-    if args['find']:
-        # GUI should go here, replace the download files function
+    if args['automated'] is not None:
+        os.chdir(args['automated'].replace('\\', '/').replace(" ",""))
         downloadFiles()
+    elif args['find']:
+        # GUI should go here
+        pass
+    # elif args['update']:
+    #     downloadFiles()
     else:
         # validate input is in correct format
         inp = args['schedule']
