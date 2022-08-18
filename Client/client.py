@@ -6,8 +6,13 @@ import datetime
 import csv
 
 
+# global value for validation error id
+error_id = 0
+
+
 # validation functions - Prab
 def check_missing(filename):
+    global error_id
     # get rows
     f = open(filename)
     filecsv = csv.reader(f)
@@ -19,11 +24,13 @@ def check_missing(filename):
     for x in rows:
         for y in x:
             if y == '':
+                error_id = 2
                 return True
     return False
     
 
 def check_bad(filename):
+    global error_id
     # get rows
     f = open(filename)
     filecsv = csv.reader(f)
@@ -43,24 +50,29 @@ def check_bad(filename):
             try:
                 float(y)
             except:
+                error_id = 4
                 return True
             # if they can be, check they are in the valid range
             if float(y) >= 10.0 or float(y) < 0.0:
+                error_id = 4
                 return True
     return False
 
 def check_header(filename):
+    global error_id
     f = open(filename)
     filecsv = csv.reader(f)
     header = next(filecsv)
     valid_header = ['batch_id', 'timestamp', 'reading1', 'reading2', 'reading3', 'reading4', 'reading5', 'reading6', 'reading7', 'reading8', 'reading9', 'reading10']
     if header != valid_header:
+        error_id = 1
         return True
     else:
         return False
 
 
 def checkUniqueBatchIDs(fileName):
+    global error_id
     # lovely bit of formatting
     file = open(fileName, "r")
     lines = [i.replace("\n", "").split(",") for i in file.readlines()]
@@ -69,6 +81,8 @@ def checkUniqueBatchIDs(fileName):
     ids = [i[0] for i in lines]
 
     # returns false if all ids are unique, true if not
+    if (not(len(ids) == len(set(ids)))):
+        error_id = 3
     return not(len(ids) == len(set(ids)))
 
 
@@ -92,6 +106,7 @@ def validateFile(file):
 
 # downloads all new files
 def downloadFiles():
+    global error_id
     """
     Downloads all new files
     :return: None
@@ -140,13 +155,26 @@ def downloadFiles():
             continue
 
         else:
-            print("BAD FILE FOUND:", filename, '\n')
+            print("BAD FILE FOUND:", filename, '\nSEE LOG.TXT FOR MORE DETAILS \n')
             # delete bad file
             print("DELETING FILE\n")
             os.remove(filename)
-            with open("log.txt",'a+') as f:
-                string = str(datetime.datetime.now()) + ' ERROR: VALIDATION'
+            # logging
+            error_id == int(error_id)
+            f = open("log.txt", "a")
+            if error_id == 1:
+                string = str(datetime.datetime.now()) + ' ERROR: BAD HEADER FOUND IN ' + filename + '\n' 
                 f.write(string)
+            if error_id == 2:
+                string = str(datetime.datetime.now()) + ' ERROR: MISSING VALUES IN ' + filename + '\n'
+                f.write(string)
+            if error_id == 3:
+                string = str(datetime.datetime.now()) + ' ERROR: DUPLICATE BATCH IDs IN ' + filename + '\n'
+                f.write(string)
+            if error_id == 4:
+                string = str(datetime.datetime.now()) + ' ERROR: BAD VALUES FOUND IN ' + filename + '\n'
+                f.write(string)
+            f.close()
             
             
     # Display the content of downloaded file
