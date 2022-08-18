@@ -219,7 +219,7 @@ def schedule(d, length):
             command += ' /D ' + weekdays[d.weekday()]
         if length == 'M':
             command += ' /D ' + f"{d.day:02}"
-        command += ' /TN "MyTasks\\Notepad task" /TR '
+        command += ' /TN "MyTasks\\FTP scheduling" /TR '
         command += pathname
         command += ' /ST ' + f"{d.hour:02}" + ':' + f"{d.minute:02}"  # + time 14:18
         command += ' /SD ' + f"{d.day:02}" + '/' + f"{d.month:02}" + '/' + f"{d.year:04}"  # + 06/06/1985
