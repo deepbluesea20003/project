@@ -3,6 +3,7 @@ import ftplib
 import os
 import argparse
 import datetime
+import tkinter as tk
 
 
 def validateFile(file):
@@ -11,7 +12,7 @@ def validateFile(file):
     return True
 
 
-# downloads all new files
+# downloads all new files, this is used for scheduling
 def downloadFiles():
     """
     Downloads all new files
@@ -41,8 +42,6 @@ def downloadFiles():
 
     for filename in myFiles:
         print("File is: ", filename, "\n")
-        # Enter File Name with Extension
-        # filename = "index2.html"
 
         # TEMP, this is where validation should be
         if filename[0] == "M":
@@ -61,22 +60,21 @@ def downloadFiles():
     ftp_server.quit()
 
 
-# schedules a rota for file downloading
-def rota(hours):
-    """
-    :param hours: float value which specifies the rota length
-    :return:
-    """
-    pass
-
-
 # schedules a date files are to be downloaded on
-def schedule(date):
+def schedule(date, length):
     """
 
-    :param date: a datetime of when the updates should schedule to
+    :param date: a datetime of when the updates should start
+    :param length: how often updates should happen, hourly daily, monthly or on log-on. (H,D,M,O)
     :return:
     """
+
+    if os.name == 'nt':
+        command = 'SCHTASKS /CREATE /SC'
+        # just need to put it into hours and have the time starting now
+        os.system('SCHTASKS /CREATE /SC HOURLY /TN "MyTasks\\Notepad task" /TR '
+                  '"C:\\Windows\\System32\\notepad.exe" /ST 14:18')
+
     pass
 
 
@@ -84,54 +82,69 @@ def schedule(date):
 def run():
     """
     -h : help page
-    -u, --update : updates the client with all new files immediately
-    -r, --rota [DAYS] : updates the client with all new files and schedules every amount of days using cron
-    -s, --schedule [DATE]: schedules data to be sent on the date specified using cron
+    -f, --find : use a GUI to find a file for a specific date
+    -s, --schedule [DATE]: schedules data to be sent on the date specified
     """
 
     parser = argparse.ArgumentParser(description='Downloading and Scheduling hospital files')
 
     group = parser.add_mutually_exclusive_group()  # only one argument allowed
 
-    group.add_argument('-u', '--update', help='Update client to have all files', required=False, action='store_true')
-
-    group.add_argument('-r', '--rota', help='Updates client every specified amount of hours', required=False,
-                       type=float)
+    group.add_argument('-f', '--find', help='Use a GUI to find a file for a specific date', required=False, action='store_true')
 
     group.add_argument('-s', '--schedule', help='Specify date which client files should be updated\n'
-                                                'The date and time should be given in the format: YYYYMMDDHHMMSS',
-                       required=False, type=str)
+                                                'The date and time should be given in the format: YYYYMMDDHHMMSS\n'
+                                                'This mode can only be done when running this program with admin '
+                                                'privileges',
+                       required=False, nargs='?')
 
     args = vars(parser.parse_args())
 
-    # if they haven't put anything
-    if not args['update'] and args['rota'] is None and args['schedule'] is None:
-        print("Please enter an option, or enter -h for help")
-        return False
-    elif args['update']:
+    # options time
+    if args['find']:
+        # GUI should go here, replace the download files function
         downloadFiles()
-    elif args['rota'] is not None:
-        if args['rota'] <= 0.083:
-            print("You may only download files at a maximum rate of once every 5 minutes")
-        else:
-            rota(args['rota'])
     else:
         # validate input is in correct format
         inp = args['schedule']
-        if len(inp) != 14:
-            print("The date and time should be given in the format: YYYYMMDDHHMMSS")
-        else:
-            # check if valid datetime
-            try:
-                d = datetime.datetime(year=int(inp[0:4]), month=int(inp[4:6]), day=int(inp[6:8]), hour=int(inp[8:10]),
-                                      minute=int(inp[10:12]), second=int(inp[12:14]))
-                schedule(d)
-            except:
-                print("The date and time should be given in the format: YYYYMMDDHHMMSS")
-                print("Must enter a valid date and time")
+        if inp is not None:
+            if len(inp) != len("YYYY/MM/DD"):
+                print("The date should be given in the format: YYYY/MM/DD")
+                return False
+            else:
+                # check if date entered is valid
+                try:
+                    date = datetime.date(year=int(inp[0:4]), month=int(inp[5:7]), day=int(inp[8:10]))
+                except:
+                    print("Must enter a valid date")
+                    print("The date should be given in the format: YYYY/MM/DD")
+                    return False
 
-        schedule(args['schedule'])
+        else:  # no date given, must be today by default
+            date = datetime.date.today()
 
+        # check if valid datetime
+
+        ops = ['H', 'D', 'W', 'M']
+        often = input("How often should your files be updated?\n"
+                      "Hourly, Daily, Weekly or Monthly? (H/D/W/M): ").upper().strip()
+
+        while often not in ops:
+            print("Not a valid input, please try again")
+            often = input("How often should your files be updated?\n"
+                          "Hourly, Daily, Weekly or Monthly? (H/D/W/M): ").upper().strip()
+
+        timeInp = input("What time during the day? (HH:MM)")
+
+        try:
+            time = datetime.time(hour=int(timeInp[0:2]), minute=int(timeInp[3:5]))
+
+            d = datetime.datetime.combine(date, time)
+
+            schedule(d, often)
+        except:
+            print("Invalid time entered,please try again")
+            return False
     print(args)
 
 
