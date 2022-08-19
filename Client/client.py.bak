@@ -14,8 +14,6 @@ error_id = 0
 # validation functions - naomi 
 
 def name_validation(filename):
-    global error_id
-    error_id = 0
     ans = None
     if ".csv" in filename:
         ans = False
@@ -66,8 +64,6 @@ def name_validation(filename):
 
 
 def emptyfile(filename):
-    global error_id
-    error_id = 0
     ans = False
     if os.stat(filename).st_size ==  0:
         ans = True
