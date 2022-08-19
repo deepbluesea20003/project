@@ -306,7 +306,7 @@ def schedule(d, length):
 def run():
     """
     -h : help page
-    -f, --find : use a GUI to find a file for a specific date
+    -f, --find : uses a GUI to find a file for a specific date
     -s, --schedule [DATE]: schedules data to be sent on the date specified
     -a, --automated [PATH]: only to be used by automated scheduler
     """
@@ -329,26 +329,12 @@ def run():
 
     args = vars(parser.parse_args())
 
-    # we need to store the location of client.py if not done so already
-    # make sure files are stored in the correct place
-    # try:
-    #     file = open("location.txt", "r")
-    #     path = file.read()
-    #     os.chdir(path)
-    #     file.close()
-    # except FileNotFoundError:
-    #     path = input("Where is your program stored?")
-    #     os.chdir(path)
-    #     file = open("location.txt", "w")
-    #     file.write(path)
-    #     file.close()
-
     # options time
     if args['automated'] is not None:
         os.chdir(args['automated'].replace('\\', '/').replace(" ",""))
         downloadFiles()
     elif args['find']:
-        # GUI should go here
+        print("Really sorry but this hasn't been implemented yet :(")
         pass
     # elif args['update']:
     #     downloadFiles()
