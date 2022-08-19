@@ -1,0 +1,2 @@
+"C:\Users\prabh\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe"  "C:\Users\prabh\Documents\GitHub\project\Client\client.py" "-a C:\Users\prabh\Documents\GitHub\project\Client"
+pause
